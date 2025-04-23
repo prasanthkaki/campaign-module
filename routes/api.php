@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Campaign;
+use App\Http\Middleware\TokenValidation;
+use App\Jobs\CampaignQueueJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +17,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::middleware([TokenValidation::class])->group(function() {
+    Route::get('/campaigns',[Campaign::class, 'campaignList']);
+    Route::post('/campaigns', [Campaign::class, 'createCampaign']);
+    Route::post('/campaigns/{id}/share', [Campaign::class, 'shareCampaign']);
+    Route::put('/campaign', [Campaign::class, 'updateCampaign']);
+    Route::delete('/campaigns/{id}/delete', [Campaign::class, 'deleteCampaign']);
+});
+
+Route::post('/campaign-queue', function () {
+    CampaignQueueJob::dispatch();
 });
